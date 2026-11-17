@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-
+from datetime import datetime
 
 def load_streamflow(filename):
     # Read the CSV file
@@ -8,8 +8,13 @@ def load_streamflow(filename):
         filename, delimiter=",", skip_header=1, dtype=str
     )
 
-    # Slice the array
-    x = data[:, 0].astype("datetime64[m]")
+    
+# Slice the array
+# Got an error about the datetime module not being imported, so I added the import statement with the help of AI
+    x = np.array(
+    [datetime.strptime(date, "%m/%d/%y %H:%M") for date in data[:, 0]],
+    dtype="datetime64[m]",
+)
     flows = data[:, 1:6].astype(float)
 
     return x, flows
@@ -34,7 +39,7 @@ def plot_streamflow(x, flows, sites):
     plt.savefig("provo_streamflow.png", dpi=150, bbox_inches="tight")
     plt.show()
 
-
+# Used AI to help me with this one. It prints out each gauge's maximum flow, minimun flow, average flow, and date and then saves the results to a CSV file
 def summarize(dates, flows, sites):
     # Excel check for 10163000: max = 131 cfs, average = 57 cfs
     print(f"{'Gauge':<12}{'Max (cfs)':>10}   {'Date of max':<16}{'Min (cfs)':>10}{'Avg (cfs)':>10}")
@@ -62,5 +67,13 @@ def summarize(dates, flows, sites):
 # Main program
 sites = ["10163000", "10155200", "10155500", "10154200", "10155000"]
 x, flows = load_streamflow("June-2021-Provo-River-Streamflow-Rates.csv")
-plot_streamflow(x, flows, sites)
 summarize(x, flows, sites)
+
+# Also used AI to help with this part. Asks user for a threshold input, counts readings above each gauge and converts the count to hours
+threshold = float(input("Enter a flow threshold in cfs: "))
+
+for i, site in enumerate(sites):
+    hours_above = np.sum(flows[:, i] > threshold) * 0.25
+    print(f"{site}: {hours_above:.2f} hours above {threshold} cfs")
+
+plot_streamflow(x, flows, sites)
