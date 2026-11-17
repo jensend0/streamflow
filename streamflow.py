@@ -31,6 +31,7 @@ def plot_streamflow(x, flows, sites):
     plt.legend(title="Site Numbers")
     plt.grid()
     plt.tick_params(axis="x", rotation=45)
+    plt.savefig("provo_streamflow.png", dpi=150, bbox_inches="tight")
     plt.show()
 
 
